@@ -1,0 +1,51 @@
+# This docker-compose application stands up the following services:
+#   - a webserver on port 8080
+#   - a FetchCommunicationService on port 9090
+#   - a SearchService on port 9091
+
+
+version: "3"
+
+volumes:
+  index_volume:
+
+services:
+
+  # Servers
+
+  fetch:
+    image: hltcoe/concrete-python
+    command: fetch-server.py --loglevel debug /home/concrete/simple-search/comms.zip
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./comms.zip:/home/concrete/simple-search/comms.zip
+
+  search:
+    image: hltcoe/cadet-search-lucene
+    command: -d /index_dir/ --fh fetch --fp 9090 --run-search
+    ports:
+      - "9091:9090"
+    volumes:
+      - index_volume:/index_dir
+
+  ui:
+    image: charman/simple-search-demo
+    command: python search-http-server.py --host 0.0.0.0 --port 8080 --fetch-host fetch --fetch-port 9090 --search-host search --search-port 9090
+    depends_on:
+      - fetch
+      - search
+    ports:
+      - "8080:8080"
+
+
+  # Commands
+
+  # Build a Lucene index from the Communications in the Fetch server
+  index.cmd:
+    depends_on:
+      - fetch
+    image: hltcoe/cadet-search-lucene
+    command: -d /index_dir/ --fh fetch --fp 9090 --build-index
+    volumes:
+      - index_volume:/index_dir
