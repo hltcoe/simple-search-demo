@@ -22,6 +22,8 @@ services:
       - ./comms.zip:/home/concrete/simple-search/comms.zip
 
   search:
+    depends_on:
+      - fetch
     image: hltcoe/cadet-search-lucene
     command: -d /index_dir/ --fh fetch --fp 9090 --run-search
     ports:
@@ -42,10 +44,10 @@ services:
   # Commands
 
   # Build a Lucene index from the Communications in the Fetch server
-  index.cmd:
+  build-search-index.cmd:
     depends_on:
       - fetch
     image: hltcoe/cadet-search-lucene
-    command: -d /index_dir/ --fh fetch --fp 9090 --build-index
+    command: -d /index_dir/ --fh fetch --fp 9090 --build-index --batch 10
     volumes:
       - index_volume:/index_dir
