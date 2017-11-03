@@ -21,6 +21,11 @@ services:
     volumes:
       - ./comms.zip:/home/concrete/simple-search/comms.zip
 
+# If you want to use the WikiQA corpus, replace the 'fetch' service
+# configuration with these lines:
+#  fetch:
+#    image: hltcoe/fetch-wikiqa-corpus
+
   search:
     depends_on:
       - fetch
@@ -32,7 +37,7 @@ services:
       - index_volume:/index_dir
 
   ui:
-    image: charman/simple-search-demo
+    image: hltcoe/simple-search-demo
     command: python search-http-server.py --host 0.0.0.0 --port 8080 --fetch-host fetch --fetch-port 9090 --search-host search --search-port 9090
     depends_on:
       - fetch
