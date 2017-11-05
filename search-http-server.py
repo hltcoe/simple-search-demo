@@ -15,10 +15,10 @@ from thrift.protocol import TJSONProtocol
 from thrift.server import TServer
 from thrift.transport import TTransport
 
-from concrete import FetchResult
+from concrete import FetchRequest, FetchResult
 from concrete.access import FetchCommunicationService
 from concrete.search import SearchService, SearchProxyService
-from concrete.util import set_stdout_encoding
+from concrete.util import lun, set_stdout_encoding
 from concrete.util.access_wrapper import FetchCommunicationClientWrapper
 from concrete.util.search_wrapper import SearchClientWrapper
 from concrete.util.tokenization import get_comm_tokenizations
@@ -139,6 +139,7 @@ class SearchServer(object):
     # DANGER WILL ROBINSON!  We are using class variables
     # to store values accessed by the Bottle route functions
     # below.
+    FETCH_HANDLER = None
     FETCH_TSERVER = None
     SEARCH_TSERVER = None
     SEARCH_PROXY_TSERVER = None
@@ -148,6 +149,7 @@ class SearchServer(object):
         self.host = host
         self.port = port
 
+        SearchServer.FETCH_HANDLER = fetch_handler
         SearchServer.STATIC_PATH = static_path
 
         fetch_processor = FetchCommunicationService.Processor(fetch_handler)
@@ -182,6 +184,24 @@ def search_http_endpoint():
 @bottle.post('/search_proxy_http_endpoint/')
 def search_proxy_http_endpoint():
     return thrift_endpoint(SearchServer.SEARCH_PROXY_TSERVER)
+
+
+@bottle.get('/get_sentence_text')
+def get_sentence_text():
+    communication_id = bottle.request.params['communication_id']
+    sentence_uuid_string = bottle.request.params['sentence_uuid_string']
+    fetch_request = FetchRequest()
+    fetch_request.communicationIds = [communication_id]
+    fetch_result = SearchServer.FETCH_HANDLER.fetch(fetch_request)
+    if fetch_result.communications and len(fetch_result.communications) == 1:
+        comm = fetch_result.communications[0]
+        for section in lun(comm.sectionList):
+            for sentence in lun(section.sentenceList):
+                if sentence.uuid.uuidString == sentence_uuid_string:
+                    return json.dumps({'sentence_text': comm.text[sentence.textSpan.start:sentence.textSpan.ending]})
+        return json.dumps({'sentence_text': 'ERROR: Could not find Sentence with UUID %s' % sentence_uuid_string})
+    else:
+        return json.dumps({'sentence_text': 'ERROR: Could not find Communication with ID %s' + communication_id})
 
 
 @bottle.route('/')
