@@ -15,7 +15,7 @@ from thrift.server import TServer
 from thrift.transport import TTransport
 
 from concrete.access import FetchCommunicationService
-from concrete.search import SearchService
+from concrete.search import SearchService, SearchProxyService
 from concrete.util import set_stdout_encoding
 from concrete.util.access_wrapper import FetchCommunicationClientWrapper
 from concrete.util.search_wrapper import SearchClientWrapper
@@ -72,12 +72,47 @@ class RelaySearchHandler(object):
     def getCapabilities(self):
         logging.debug('RelaySearchHandler.getCapabilities()')
         with SearchClientWrapper(self.host, self.port) as sc:
-            return sc.getCapabilities(query)
+            return sc.getCapabilities()
 
     def search(self, query):
         logging.debug('RelaySearchHandler.search()')
         with SearchClientWrapper(self.host, self.port) as sc:
             return sc.search(query)
+
+
+class SearchProxyHandler(object):
+    def __init__(self, search_providers):
+        '''
+        Args:
+            search_providers (dict): Maps provider names to RelaySearchHandler instances
+        '''
+        self.search_providers = search_providers
+
+    def about(self):
+        logging.debug('SearchProxyHandler.about()')
+        return ServiceInfo(
+            name='SearchProxyHandler',
+            version='0.0.1')
+
+    def alive(self):
+        logging.debug('SearchProxyHandler.alive()')
+        return True
+
+    def getCapabilities(self, provider):
+        logging.debug('SearchProxyHandler.getCapabilities("%s")' % provider)
+        return self.search_providers[provider].getCapabilities()
+
+    def getCorpora(self, provider):
+        logging.debug('SearchProxyHandler.getCorpora("%s")' % provider)
+        return self.search_providers[provider].getCorpora()
+
+    def getProviders(self):
+        logging.debug('SearchProxyHandler.getProviders()')
+        return self.search_providers.keys()
+
+    def search(self, query, provider):
+        logging.debug('SearchProxyHandler.search()')
+        return self.search_providers[provider].search(query)
 
 
 class SearchServer(object):
@@ -86,9 +121,10 @@ class SearchServer(object):
     # below.
     FETCH_TSERVER = None
     SEARCH_TSERVER = None
+    SEARCH_PROXY_TSERVER = None
     STATIC_PATH = None
 
-    def __init__(self, host, port, static_path, fetch_handler, search_handler):
+    def __init__(self, host, port, static_path, fetch_handler, search_handler, search_proxy_handler):
         self.host = host
         self.port = port
 
@@ -104,6 +140,11 @@ class SearchServer(object):
         SearchServer.SEARCH_TSERVER = TServer.TServer(
             search_processor, None, None, None, search_pfactory, search_pfactory)
 
+        search_proxy_processor = SearchProxyService.Processor(search_proxy_handler)
+        search_proxy_pfactory = TJSONProtocol.TJSONProtocolFactory()
+        SearchServer.SEARCH_PROXY_TSERVER = TServer.TServer(
+            search_proxy_processor, None, None, None, search_proxy_pfactory, search_proxy_pfactory)
+
     def serve(self):
         bottle.run(host=self.host, port=self.port)
 
@@ -116,6 +157,11 @@ def search_http_endpoint():
 @bottle.post('/search_http_endpoint/')
 def search_http_endpoint():
     return thrift_endpoint(SearchServer.SEARCH_TSERVER)
+
+
+@bottle.post('/search_proxy_http_endpoint/')
+def search_proxy_http_endpoint():
+    return thrift_endpoint(SearchServer.SEARCH_PROXY_TSERVER)
 
 
 @bottle.route('/')
@@ -172,8 +218,9 @@ def main():
 
     fetch_handler = RelayFetchCommunicationHandler(args.fetch_host, args.fetch_port)
     search_handler = RelaySearchHandler(args.search_host, args.search_port)
+    search_proxy_handler = SearchProxyHandler({'default': search_handler})
     
-    ss = SearchServer(args.host, args.port, args.static_path, fetch_handler, search_handler)
+    ss = SearchServer(args.host, args.port, args.static_path, fetch_handler, search_handler, search_proxy_handler)
     ss.serve()
 
 
