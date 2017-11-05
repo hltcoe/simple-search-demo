@@ -10,10 +10,12 @@ import json
 import logging
 
 import bottle
+from lru import LRU
 from thrift.protocol import TJSONProtocol
 from thrift.server import TServer
 from thrift.transport import TTransport
 
+from concrete import FetchResult
 from concrete.access import FetchCommunicationService
 from concrete.search import SearchService, SearchProxyService
 from concrete.util import set_stdout_encoding
@@ -22,10 +24,17 @@ from concrete.util.search_wrapper import SearchClientWrapper
 from concrete.util.tokenization import get_comm_tokenizations
 
 
+
 class RelayFetchCommunicationHandler(object):
-    def __init__(self, host, port):
+    def __init__(self, host, port, lru_cache_size):
         self.host = host
         self.port = int(port)
+        if lru_cache_size > 0:
+            self.lru_cache_enabled = True
+            self.lru_comms = LRU(lru_cache_size)
+        else:
+            self.lru_cache_enable = False
+            self.lru_comms = None
 
     def about(self):
         logging.debug('RelayFetchCommunicationHandler.about()')
@@ -39,8 +48,19 @@ class RelayFetchCommunicationHandler(object):
 
     def fetch(self, request):
         logging.debug('RelayFetchCommunicationHandler.fetch()')
+        if self.lru_cache_enabled:
+            # Only use LRU cache if all requested Communications are in the cache
+            if all([comm_id in self.lru_comms for comm_id in request.communicationIds]):
+                logging.debug('RelayFetchCommunicationHandler.fetch() - Retrieving Communications from LRU cache')
+                result = FetchResult()
+                result.communications = [self.lru_comms[comm_id] for comm_id in request.communicationIds]
+                return result
         with FetchCommunicationClientWrapper(self.host, self.port) as fc:
             result = fc.fetch(request)
+            if self.lru_cache_enabled:
+                for comm in result.communications:
+                    logging.debug('Caching Communication with ID "%s"' % comm.id)
+                    self.lru_comms[comm.id] = comm
             return result
 
     def getCommunicationCount(self):
@@ -211,15 +231,17 @@ def main():
                         help='Logging verbosity level threshold (to stderr)',
                         default='info')
     parser.add_argument('--static-path', default='ui', help='Path where HTML files are stored')
+    parser.add_argument('--lru-cache-size', type=int, default=0,
+                        help='Size of LRU Communication cache.  Default is 0, which disables cache')
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
                         level=args.loglevel.upper())
 
-    fetch_handler = RelayFetchCommunicationHandler(args.fetch_host, args.fetch_port)
+    fetch_handler = RelayFetchCommunicationHandler(args.fetch_host, args.fetch_port, args.lru_cache_size)
     search_handler = RelaySearchHandler(args.search_host, args.search_port)
     search_proxy_handler = SearchProxyHandler({'default': search_handler})
-    
+
     ss = SearchServer(args.host, args.port, args.static_path, fetch_handler, search_handler, search_proxy_handler)
     ss.serve()
 
