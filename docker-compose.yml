@@ -38,7 +38,7 @@ services:
 
   ui:
     image: hltcoe/simple-search-demo
-    command: python search-http-server.py --host 0.0.0.0 --port 8080 --fetch-host fetch --fetch-port 9090 --search-host search --search-port 9090
+    command: --host 0.0.0.0 --port 8080 --fetch-host fetch --fetch-port 9090 --search-host search --search-port 9090 --lru-cache-size 50
     depends_on:
       - fetch
       - search
