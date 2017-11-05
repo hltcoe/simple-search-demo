@@ -164,7 +164,7 @@ def main():
     parser.add_argument('-l', '--loglevel', '--log-level',
                         help='Logging verbosity level threshold (to stderr)',
                         default='info')
-    parser.add_argument('--static-path', default='.', help='Path where HTML files are stored')
+    parser.add_argument('--static-path', default='ui', help='Path where HTML files are stored')
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
