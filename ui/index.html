@@ -1,37 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>Simple search</title>
-
+<head>
+    <title>Concrete Search UI</title>
+    <meta charset='UTF-8'>
     <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/jquery-ui.css" rel="stylesheet">
+    <link href="css/jquery.dataTables.min.css" rel="stylesheet">
+    <link href="css/buttons.dataTables.min.css" rel="stylesheet">
+    <link href="css/index.css" rel="stylesheet">
 
     <script src="js/jquery-1.11.1.js"></script>
-    <script src="js/jquery-ui-1.12.1.js"></script>
+    <script src="js/jquery.dataTables.min.js"></script>
+    <script src="js/dataTables.buttons.min.js"></script>
+    <script src="js/buttons.colVis.min.js"></script>
     <script src="js/bootstrap.js"></script>
     <script src="js/thrift.js"></script>
     <script src="js/concrete.js"></script>
-    <script src="js/index-ui.js"></script>
-
-    <style>
-    </style>
-  </head>
-  <body>
+    <script src="js/lru.js"></script>
+    <script src="js/cadet.js"></script>
+    <script src="js/index.js"></script>
+</head>
+<body>
     <div class="container-fluid">
-      <legend>Simple Search</legend>
-
-      <div style="margin-left: 2em;">
         <div class="row">
-          <div class="col-md-6 col-sm-6">
-            <input id="user_search" name="query" type="text"class="form-control input-md">
-          </div>
-          <div class="col-md-6 col-sm-6">
-            <button id="search_button" name="search_button" class="btn btn-success">Search</button>
-          </div>
+            <div class="pull-left">
+            </div>
+            <div class="pull-right">
+                <span id="greeting"></span>
+            </div>
         </div>
-        <div id="search_results">
+
+        <div class="row">
+            <input name="query" id="user_search" type="text" style="width:50%" placeholder="Search...">
+            <button class="btn btn-primary glyphicon glyphicon-search" id="search_button"></button>
         </div>
-      </div>
-    </div>
-  </body>
+
+        <div id="errors"></div>
+
+        <ul id="nav-tabs" class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" href="#search_results">Search Results</a></li>
+        </ul>
+
+        <div id="tab-content" class="tab-content">
+            <div id="search_results" class="tab-pane active">
+                <table id="results_table" class="display"></table>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</body>
 </html>
