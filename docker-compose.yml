@@ -30,7 +30,7 @@ services:
     depends_on:
       - fetch
     image: hltcoe/cadet-search-lucene
-    command: -d /index_dir/ --fh fetch --fp 9090 --run-search
+    command: -p 9090 -d /index_dir/ --fh fetch --fp 9090 --run-search
     ports:
       - "9091:9090"
     volumes:
