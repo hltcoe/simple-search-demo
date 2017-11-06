@@ -21,8 +21,9 @@ Building the Search Index
 Before you can search through the Communications, you must first index
 them using Lucene with the command:
 
-    docker-compose -f docker-compose-build-index.yml run build-search-index.cmd
+    ./build-index.sh
 
+This shell script simply runs `docker-compose` to build the index.
 The indexing process can take a while.  On one relatively new laptop,
 the process took roughly 10 minutes per GB of (uncompressed)
 Communication files, but your mileage will vary.
