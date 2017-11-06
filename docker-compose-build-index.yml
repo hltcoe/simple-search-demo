@@ -22,9 +22,11 @@ services:
       - .:/home/concrete/simple-search/files/
 
 #   # If you want to use the WikiQA corpus, comment out the 'fetch' configuration
-#   # section above, and uncomment the two lines below:
+#   # section above, and uncomment the four lines below:
 #   fetch:
 #     image: hltcoe/fetch-wikiqa-corpus
+#   ports:
+#     - "9090:9090"
 
   # Build a Lucene index from the Communications in the Fetch server
   build-search-index.cmd:
