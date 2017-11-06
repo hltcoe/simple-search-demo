@@ -17,7 +17,7 @@ Concrete Communications you want to search.
 Before you can search through the Communications, you must first index
 them using the command:
 
-    docker-compose run build-search-index.cmd
+    docker-compose -f docker-compose-build-index.yml run build-search-index.cmd
 
 The indexing process can take a while.  On one relatively new laptop,
 the process took roughly 10 minutes per GB of (uncompressed)

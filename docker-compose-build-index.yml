@@ -26,21 +26,11 @@ services:
 #  fetch:
 #    image: hltcoe/fetch-wikiqa-corpus
 
-  search:
+  # Build a Lucene index from the Communications in the Fetch server
+  build-search-index.cmd:
     depends_on:
       - fetch
     image: hltcoe/cadet-search-lucene
-    command: -p 9090 -d /index_dir/ --fh fetch --fp 9090 --run-search
-    ports:
-      - "9091:9090"
+    command: -d /index_dir/ --fh fetch --fp 9090 --build-index --batch 10
     volumes:
       - index_volume:/index_dir
-
-  ui:
-    image: hltcoe/simple-search-demo
-    command: --host 0.0.0.0 --port 8080 --fetch-host fetch --fetch-port 9090 --search-host search --search-port 9090 --lru-cache-size 50
-    depends_on:
-      - fetch
-      - search
-    ports:
-      - "8080:8080"
