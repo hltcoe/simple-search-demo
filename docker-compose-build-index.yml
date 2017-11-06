@@ -21,10 +21,10 @@ services:
     volumes:
       - ./comms.zip:/home/concrete/simple-search/comms.zip
 
-# If you want to use the WikiQA corpus, replace the 'fetch' service
-# configuration with these lines:
-#  fetch:
-#    image: hltcoe/fetch-wikiqa-corpus
+#   # If you want to use the WikiQA corpus, comment out the 'fetch' configuration
+#   # section above, and uncomment the two lines below:
+#   fetch:
+#     image: hltcoe/fetch-wikiqa-corpus
 
   # Build a Lucene index from the Communications in the Fetch server
   build-search-index.cmd:
