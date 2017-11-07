@@ -68,3 +68,27 @@ You should now be able to interact with the search application by
 going to:
 
 http://localhost:8080
+
+
+Using the Concretely Annotated WikiQA Corpus
+--------------------------------------------
+
+A Docker image containing a FetchCommunicationService service bundled
+with the "WikiQA Corpus" is available on Docker Hub:
+
+  https://hub.docker.com/r/hltcoe/fetch-wikiqa-corpus/
+
+The WikiQA corpus is a subset of
+[Concretely Annotated Gigaword (CAW)](http://dx.doi.org/10.7281/T1/D06YVM).
+A more detailed description of the corpus is available on the GitHub
+page for the Docker image:
+
+  https://github.com/hltcoe/fetch-wikiqa-corpus
+
+If you would like to use the WikiQA corpus, please follow the
+instructions in the [docker-compose.yml](docker-compose.yml) file
+for editing the Docker image used for the 'fetch' service.
+
+Please note that the `fetch-wikiqa-corpus` Docker image does not
+include a pre-built search index.  You must still follow the
+instructions in the 'Building the Search Index' section above.
