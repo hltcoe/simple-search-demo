@@ -12,8 +12,7 @@ The repo also contains a `docker-compose.yml` file for standing up:
 
 The `docker-compose.yml` file assumes that you have a Zip archive in
 the current directory named `comms.zip` that contains the
-Concrete Communications you want to search.  See comments in `docker-compose.yml` regarding an example Fetch service based on less than 3,000 documents from [Concretely Annotated Wikipedia](https://archive.data.jhu.edu/dataset.xhtml?persistentId=doi:10.7281/T1/D06YVM).
-
+Concrete Communications you want to search. 
 
 Building the Search Index
 -------------------------
