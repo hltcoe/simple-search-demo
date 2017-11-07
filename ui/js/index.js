@@ -1,5 +1,6 @@
 /* globals
      CADET,
+     concrete,
      FetchRequest,
      LRUMap,
      SearchQuery,
@@ -164,9 +165,9 @@ function executeSearchQueryFromSearchBox() {
 }
 
 function getIdForSearchResultItem(searchResultItem) {
-    return(selectorSafeString('' + searchResultItem.communicationId + '_' +
-                              searchResultItem.sentenceId.uuidString + '_' +
-                              searchResultItem.search_result_index));
+    return(concrete.util.selectorSafeString('' + searchResultItem.communicationId + '_' +
+                                            searchResultItem.sentenceId.uuidString + '_' +
+                                            searchResultItem.search_result_index));
 }
 
 /** Create a new tab containing the Communication text for a search result
@@ -213,26 +214,6 @@ function openSearchResultTab(event) {
             displayErrorMessage('Unable to find Communication with ID "' + request.communicationIds[0] + '"');
         }
     });
-}
-
-
-/**
- * Takes a string, returns a version of the string that replaces
- * any of the CSS selector metacharacters:
- *   !"#$%&'()*+,./:;<=>?@[\]^`{|}~
- * with an underscore.  Per the jQuery documentation, these
- * metacharacters in CSS selector names if they are escaped with '\\',
- * but replacing them with underscores seems less likely to cause
- * strange behavior.
- *
- * Useful for handling Entity IDs that are prefixed with a colon,
- * e.g. ':Entity_ENG_EDL_0088070'.
- *
- * @param {String} s
- * @returns {String}
- */
-function selectorSafeString(s) {
-  return s.replace(/[!"#$%&'()*+,./:;<=>?@[\]^`{|}~]/g, '_');
 }
 
 
