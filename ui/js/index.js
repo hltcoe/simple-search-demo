@@ -101,6 +101,7 @@ function createResultsTable() {
         language: {
             emptyTable: 'No matching search results'
         },
+        order: [],
     });
 }
 
