@@ -15,11 +15,11 @@ services:
 
   fetch:
     image: hltcoe/concrete-python
-    command: fetch-server.py --loglevel debug /home/concrete/simple-search/files/comms.zip
+    command: fetch-server.py --loglevel debug /data/augmented_sources.concrete.zip
     ports:
       - "9090:9090"
     volumes:
-      - .:/home/concrete/simple-search/files/
+      - ../data:/data/
 
 #   # If you want to use the WikiQA corpus, comment out the 'fetch' configuration
 #   # section above, and uncomment the four lines below:
