@@ -15,7 +15,7 @@ services:
 
   fetch:
     image: hltcoe/concrete-python
-    command: fetch-server.py --loglevel debug /data/augmented_sources.concrete
+    command: fetch-server.py --loglevel debug /data/demo_comms_and_augmented_sources.concrete.zip
     ports:
       - "9090:9090"
     volumes:
